@@ -31,3 +31,7 @@ desktop.ini
 # ── 本地私有笔记 ──
 private/
 *.private.md
+
+# ── 本地推送辅助 ──
+push.ps1
+
