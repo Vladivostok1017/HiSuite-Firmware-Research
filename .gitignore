@@ -1,0 +1,33 @@
+# ── 抓包与解包产物（体积大 / 含设备标识，不入库）──
+*.log
+!docs/**/*.log
+capture_out.log
+ssl_capture.log
+captures/rom/
+captures/*.log
+
+# ── OTA 与解包中间件 ──
+*.zip
+*.APP
+*.gz
+*.bin
+work/
+ota/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ── 编辑器 / 系统 ──
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ── 本地私有笔记 ──
+private/
+*.private.md

@@ -1,0 +1,242 @@
+################################################################################
+# HiSuite 17.0.0.100 —— 一次「系统更新 → 检查更新」的 TLS 明文样本
+# 采集: 2026-11-06, Frida 17 + tools/hook_ssl.js
+# 设备: HUAWEI NOP-AN01P (porsche-cn) / HarmonyOS 4.2.0.196 / 正常系统（非 fastboot）
+# 已脱敏: ed/ek 长 hex、v3 token、请求 ID、CDN 请求 ID 全部替换为占位符
+################################################################################
+
+[set_verify mode=1]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1) 行为上报（二次加密，无法直接读内容）
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=1256]
+POST /sdkv2 HTTP/1.1
+Pragma: no-cache
+User-Agent: HiSuite_17.0.0.100
+Accept: */*
+Accept-Language: zh-cn
+Content-Type: application/x-www-form-urlencoded
+Cache-Control: no-cache
+Host: data.hicloud.com:6447
+Content-Length: 1020
+
+{"vs":"1.0","ed":"<ENCRYPTED_DATA>","ek":"<ENCRYPTED_KEY>"}
+
+[READ len=207]
+HTTP/1.1 200 OK
+Date: Fri, 06 Nov 2026 09:30:34 GMT
+Content-Length: 0
+Connection: keep-alive
+X-XSS-Protection: 1; mode=block
+X-frame-options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server: elb
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2) HiSuite 自身版本检查（明文 XML，与设备固件无关）
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=698]
+POST /sp_dashboard_global/UrlCommand/CheckNewVersion.aspx?latest=true HTTP/1.1
+Host: query.hicloud.com
+Accept: */*
+Cache-Control: no-cache
+Pragma: no-cache
+Content-Length: 289
+User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36
+Content-Type: application/x-www-form-urlencoded
+
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <rule name="DashBoard">54</rule>
+    <rule name="DeviceName">HiSuiteConfig</rule>
+    <rule name="FirmWare">Hisuite_17.0.0.100</rule>
+    <rule name="OS"> Windows 10 Enterprise 6.3 </rule>
+    <rule name="PackageType">China</rule>
+</root>
+
+[READ len=396]
+HTTP/1.1 200 OK
+Date: Fri, 06 Nov 2026 09:32:31 GMT
+Content-Type: application/xml; charset=utf-8
+Content-Length: 70
+Connection: keep-alive
+x-nuwa-sample-state: planned_no_sample
+x-nuwa-request-microservice: X
+Server: elb
+
+<?xml version="1.0" encoding="UTF-8"?>
+<root><status>1</status></root>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3) ★ base 段固件清单 —— 这就是我们要的东西
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=285]
+GET /download/data/pub_13/HWHOTA_hota_900_9/66/v3/<TOKEN>/full/filelist.xml HTTP/1.1
+Host: update.dbankcdn.com
+
+[READ len=1983]
+HTTP/1.1 200 OK
+Date: Fri, 06 Nov 2026 09:36:04 GMT
+Content-Type: application/xml
+Content-Length: 1182
+Connection: keep-alive
+Server: openresty
+x-amz-request-id: <CDN_REQ_ID>
+ETag: "7e321460569aa2ebad1f8ec5031914d8"
+Last-Modified: Tue, 21 May 2024 08:17:33 GMT
+x-amz-content-sha256: ae89bec28b878975a82d4c2dcd2794d03312008c5defcd3fb6ffb9a17fab00ec
+X-CCDN-Expires: 600
+X-CCDN-CacheTTL: 600
+Accept-Ranges: bytes
+dl-from: hwcdn
+X-Cdn-Request-ID: <CDN_REQ_ID>
+
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<component>
+<name>TCPU</name>
+<compress>0</compress>
+</component>
+<maxStashInfo>52428800</maxStashInfo>
+<supportPKI>1</supportPKI>
+<const.persist.dex2oat.versionNum>1b4f005d35d845488eafba7b5a126bfa708886f37a7d6c4617790edf5bedadc4</const.persist.dex2oat.versionNum>
+<preAdjustFeature>false</preAdjustFeature>
+<vendorInfo name="base" subpath="" logfile="changelog_base.xml" package="update_full_base.zip" precut_size="0"/>
+<GROUP version="G6.0"/>
+<GBC>
+<GBCINFO name="other" version="NA"/>
+</GBC>
+<GBP>
+<GBPINFO name="other" version="NA"/>
+</GBP>
+<userlicense language="default" version="202201"/>
+<files>
+<file>
+<spath>update_full_base.zip</spath>
+<dpath>update_full_base.zip</dpath>
+<operation>c</operation>
+<md5>13AE2CC8B1347248D094D8F473BFD119</md5>
+<sha256>5B285878B0217E866E21B4E14B617A60160082EC6F35BB29BAFBE37D522759BD</sha256>
+<size>5683825610</size>
+</file>
+<file>
+<spath>changelog_base.xml</spath>
+<dpath>changelog_base.xml</dpath>
+<operation>c</operation>
+<md5>574218BADE5B9478A483E36526085B2E</md5>
+<sha256>880403990F365BE4E57800F099752B6E94F8EAD7D79BC94140CD892032ED79FB</sha256>
+<size>83608</size>
+</file>
+</files>
+</root>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4) cust 段清单
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=285]
+GET /download/data/pub_13/HWHOTA_hota_900_9/7/v3/<TOKEN>/full/filelist.xml HTTP/1.1
+Host: update.dbankcdn.com
+
+[READ len=1813]
+HTTP/1.1 200 OK
+Content-Type: application/xml
+Content-Length: 1012
+Last-Modified: Tue, 21 May 2024 08:16:14 GMT
+
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<component>
+<name>TCPU</name>
+<compress>0</compress>
+</component>
+<vendorInfo name="cust" subpath="" logfile="changelog_cust_porsche_cn.xml" package="update_full_cust_NOP-AN01P_porsche_cn.zip" precut_size="0"/>
+<GROUP version="G6.0"/>
+<GBC version="NA"/>
+<files>
+<file>
+<spath>update_full_cust_NOP-AN01P_porsche_cn.zip</spath>
+<dpath>update_full_cust_NOP-AN01P_porsche_cn.zip</dpath>
+<operation>c</operation>
+<md5>B6B3FCA9C2572B77ACA8BF733AA1F0E5</md5>
+<sha256>ACA63935CBE1DE42C5C452F208AC1DF85CA45C4C1B8F38621D95ADC4BEA50B77</sha256>
+<size>241982039</size>
+</file>
+</files>
+</root>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5) preload 段清单
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=286]
+GET /download/data/pub_13/HWHOTA_hota_900_9/09/v3/<TOKEN>/full/filelist.xml HTTP/1.1
+Host: update.dbankcdn.com
+
+[READ len=1853]
+HTTP/1.1 200 OK
+Content-Type: application/xml
+Content-Length: 1052
+Last-Modified: Tue, 21 May 2024 08:16:40 GMT
+
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<component>
+<name>TCPU</name>
+<compress>0</compress>
+</component>
+<vendorInfo name="preload" subpath="" logfile="changelog_preload_porsche_cn_R8.xml" package="update_full_preload_NOP-AN01P_porsche_cn_R8.zip" precut_size="0"/>
+<GROUP version="G6.0"/>
+<GBP version="NA"/>
+<files>
+<file>
+<spath>update_full_preload_NOP-AN01P_porsche_cn_R8.zip</spath>
+<dpath>update_full_preload_NOP-AN01P_porsche_cn_R8.zip</dpath>
+<operation>c</operation>
+<md5>B219D6895EF3CC86C116241073208A86</md5>
+<sha256>D93F4BF605AB3FCD46B4C7580671C5EFB02ECEF5B6F9A89C5DD090A2B1669440</sha256>
+<size>1229169548</size>
+</file>
+</files>
+</root>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6) full_back 的 changelog（回退包说明，可见"回退到 HarmonyOS 4.0"）
+# ─────────────────────────────────────────────────────────────────────────────
+[WRITE len=282]
+GET /download/data/pub_13/HWHOTA_hota_900_9/17/v3/<TOKEN>/changelog.xml HTTP/1.1
+Host: update.dbankcdn.com
+
+[READ len=2305]
+HTTP/1.1 200 OK
+Content-Type: application/xml
+Content-Length: 2305
+Last-Modified: Tue, 21 May 2024 08:16:06 GMT
+
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<component name="TCPU" version="请自行修改"/>
+<default-language name="en-us">1033</default-language>
+<language name="zh-cn" code="2052">
+<features module="" type="header">
+<feature>亲爱的用户，本次更新将回退至 HarmonyOS 4.0 版本。</feature>
+</features>
+<features module="【回退注意事项】" type="end">
+<feature>1. 请确保系统当前使用的是官方版本，且未进行任何非官方版本升级，否则有回退不成功的风险甚至可能引入未知问题。
+2. 请确保当前版本没有进行过任何解锁、Root 操作。
+3. 回退操作将擦除所有用户数据。请在回退前将所有重要数据备份至 SD 卡、PC 或云端，并确认备份内容完整有效。
+4. 请确保手机电量大于 50%。</feature>
+</features>
+</language>
+</root>
+
+################################################################################
+# 附：本次未出现在抓包中、但存在于二进制里的接口
+#
+#   POST /sp_ard_common/v2/CheckAndAuthorize.action?latest=true&verType=true
+#        Host: query.hicloud.com    ← 设备固件查询（请求体加密）
+#   POST /BL/v1/CheckAndAuthorize
+#        Host: query.hicloud.com    ← bootloader 授权（仅 rescue 通道）
+#
+# 这两个接口的响应里可能也带固件标识，但本次实验中固件清单是从
+# update.dbankcdn.com 的 filelist.xml 直接拿到的，不需要解密它们。
+################################################################################
