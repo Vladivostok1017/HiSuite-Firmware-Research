@@ -34,7 +34,7 @@ HiSuite 对已下载文件做 **SHA256 校验**（`sha256 not match.` 分支存�
 
 ### 5. 不要手动编辑或删除 `toDeleteROM.dat`
 
-这是 HiSuite 的**待删 ROM 清单**，纯文本、一行一个绝对路径。往里塞内容等于让它"按你给的路径去删文件"。
+这是 HiSuite 的**待删 ROM 清单**，纯文本、一行一个绝对路径。往里塞内容等于让它"按清单里的路径去删文件"。
 
 ### 6. 不要删 `userdata\UpdateDogDev\`
 

@@ -111,8 +111,7 @@ base 包内 `UPDATE.APP` 约 6.78 GB，含 8 处 `ANDROID!` 命中，其中 3 �
 | [`docs/03-ota-package-structure.md`](docs/03-ota-package-structure.md) | OTA 包解剖、`UPDATE.APP`、boot/kernel 提取流程 |
 | [`docs/04-frida-capture.md`](docs/04-frida-capture.md) | 用 Frida 在进程内抓 TLS 明文的完整方法 |
 | [`docs/05-danger-zones.md`](docs/05-danger-zones.md) | 会变砖的操作清单 |
-| [`docs/06-opensource-links.md`](docs/06-opensource-links.md) | 华为开源发布页索引 |
-| [`findings/2026-11-06-nop-an01p.md`](findings/2026-11-06-nop-an01p.md) | 本次完整实证记录（含失败路径） |
+| [`findings/2026-11-06-nop-an01p.md`](findings/2026-11-06-nop-an01p.md) | 端到端实证记录（含失败路径） |
 
 ---
 
@@ -126,7 +125,7 @@ base 包内 `UPDATE.APP` 约 6.78 GB，含 8 处 `ANDROID!` 命中，其中 3 �
 - 目标版本 = 当前版本时，"系统修复"通道会以 `invalid` 中止（因为无更新必要），但「系统更新」通道仍能查出包（只是 HiSuite 不下载）
 - 抓到的 `filelist.xml` 有时效（响应头 `X-CCDN-Expires: 600`，10 分钟量级），过期需重新抓
 
-**已知版本差异**：同一个版本号可能对应多次编译。例如 `4.2.0.196` 在 CDN 上的 base 包内核是 `2024-04-26` 构建，而设备实跑的是 `2026-08-20` 构建——**同版本号、同工具链、不同构建期**。用包内内核做符号/偏移研究时必须先验 banner。
+**已知版本差异**：同一个版本号可能对应多次编译。例如 `4.2.0.196` 在 CDN 上的 base 包内核是 `2024-04-26` 构建，而设备实跑的是 `2026-08-20` 构建——**同版本号、同工具链、不同构建期**。用包内内核做版本比对时必须先验 banner。
 
 ---
 
@@ -141,7 +140,6 @@ base 包内 `UPDATE.APP` 约 6.78 GB，含 8 处 `ANDROID!` 命中，其中 3 �
 
 ## 致谢
 
-- [NebuSec](https://github.com/NebuSec) 等公开内核研究社区（提供了"从官方 OTA 反推偏移"的方法论参考）
 - Frida 项目（进程内 TLS 明文抓取）
 - 所有在 issue 里贡献机型/版本组合的人
 

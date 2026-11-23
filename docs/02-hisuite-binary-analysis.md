@@ -63,7 +63,7 @@ bl_update=https://query.hicloud.com
 
 ### 1.3 `hwtools` 的存在本身就是证据
 
-`fastboot.exe` 与 `hdbtransport.exe` 被打包进安装目录，说明刷写阶段 HiSuite 会**调用本地 fastboot 向设备下发分区镜像**。本次未运行它们（遵守约束）。
+`fastboot.exe` 与 `hdbtransport.exe` 被打包进安装目录，说明刷写阶段 HiSuite 会**调用本地 fastboot 向设备下发分区镜像**。该样本中未运行它们。
 
 ---
 
@@ -214,7 +214,7 @@ Already Finish FileSize %llu, Alread Report Progress is %d
 
 - 版本查询日志里每次都有 `SaleInfo:|cn|porsche|N|EmotionUI_14.2.0|**8.6 GB**||8_3.1GHz`（**确证，日志原文**）。该字段含义未在代码中定位到解析逻辑，**不能确证它就是包体大小**（也可能是机型规格位）。→ **无法判断**。
 - 代码里存在 `romsize` 字段（0x762E88，与 `partitionName`、`value`、`packagetype` 相邻）与 `rom_feature` 清单，说明真实大小由服务端 XML 下发，静态无法预知。
-- 参考：本次日志显示 C: 剩余 118 GB（`Free Disk:118001MB`），HiSuite 已做磁盘余量检查（`IDS_SYSTEMUPDATE_COMPUTERDISKSPACESHORTAGE`=电脑磁盘空间不足、`IDS_UPDATE_LACKOFSPACEFREESOMESTORAGESPACETRYAGAIN`）。
+- 参考：该样本日志显示 C: 剩余 118 GB（`Free Disk:118001MB`），HiSuite 已做磁盘余量检查（`IDS_SYSTEMUPDATE_COMPUTERDISKSPACESHORTAGE`=电脑磁盘空间不足、`IDS_UPDATE_LACKOFSPACEFREESOMESTORAGESPACETRYAGAIN`）。
 
 ---
 
@@ -250,7 +250,7 @@ Delete ROM [%s]
 006B4922  call 0x69d080        ;   ← 真正执行删除
 ```
 
-**要点**：删除是**按 `GetRomDir()` 拼出的绝对路径逐个文件进行**，且每个被删文件都会以 `Delete ROM [<路径>]` 写入 `SystemUpdate` 日志。也就是说——**如果你打开 `SystemUpdate_*.log` 搜 `Delete ROM`，就能直接看到被删文件的完整路径。** 本次日志里搜索结果为 0 条，说明本次会话**从未删除过任何 ROM 文件**（与 ROM 目录为空一致）。
+**要点**：删除是**按 `GetRomDir()` 拼出的绝对路径逐个文件进行**，且每个被删文件都会以 `Delete ROM [<路径>]` 写入 `SystemUpdate` 日志。也就是说——**在 `SystemUpdate_*.log` 里搜 `Delete ROM`，可直接看到被删文件的完整路径。** 该样本的日志里搜索结果为 0 条，说明该次采集**从未删除过任何 ROM 文件**（与 ROM 目录为空一致）。
 
 ### 3.2 持久化删除队列 `toDeleteROM.dat` —— 确证
 
@@ -430,7 +430,7 @@ destPathName= ...\changelog.xml
 
 ——而且那是 **HiSuite 自身升级**（`taskType=202`，`LiveUpdateHisuite`），**不是设备固件**。
 
-### 5.2 代码里存在“打印 URL”的日志串，但不在本次走的路径上
+### 5.2 代码里存在“打印 URL”的日志串，但不在该样本走的路径上
 
 确证（宽字符串）：
 
@@ -444,7 +444,7 @@ Download System Update Package Failed,the error code is %d
 ```
 
 这一片的邻居是 `UpdateDev\full\`、`update.zip`、`Check MD5 suc./fail.` —— 属于**旧版 `update.zip` 系统更新通道**。
-结论：**若走 `update.zip` 通道，URL 会以 `Download url:` 打到 `HiSuite_SystemUpdate` 日志；本次走的是 `cloud_rom` 分片通道，日志中没有 URL。** → **强推测**：cloud_rom 通道不记录 URL。
+结论：**若走 `update.zip` 通道，URL 会以 `Download url:` 打到 `HiSuite_SystemUpdate` 日志；该样本走的是 `cloud_rom` 分片通道，日志中没有 URL。** → **强推测**：cloud_rom 通道不记录 URL。
 
 ### 5.3 协议与鉴权 —— 确证
 
@@ -547,7 +547,7 @@ restrictedRecovery       → 受限恢复
 notify_custom_001.xml    → 定制提示
 ```
 
-→ **`full_recovery` 才是“救援模式”真正对应的包类型**（本次日志的 `IsRescueMode return rescue_version: rescue0.8` 说明设备处于救援态，但查询返回的仍是 `full/full_back`，未出现 `full_recovery`）。
+→ **`full_recovery` 才是“救援模式”真正对应的包类型**（该样本日志中的 `IsRescueMode return rescue_version: rescue0.8` 说明设备处于救援态，但查询返回的仍是 `full/full_back`，未出现 `full_recovery`）。
 
 ---
 
@@ -571,7 +571,7 @@ notify_custom_001.xml    → 定制提示
 
 **方案 B —— 用官方“本地 ROM”入口（最安全，但需要先有包）**
 
-`IDS_ROMUPDATE_LOCATIONROM`=“打开本地ROM>>” 说明 HiSuite 可以加载用户指定的本地包。这条路径的价值是：**包一旦拿到，后续“解压→安装”可以完全由你控制节奏，不依赖下载阶段**。
+`IDS_ROMUPDATE_LOCATIONROM`=“打开本地ROM>>” 说明 HiSuite 可以加载用户指定的本地包。这条路径的价值是：**包一旦拿到，后续“解压→安装”可以完全由操作者控制节奏，不依赖下载阶段**。
 
 **方案 C —— 只观察不取包（零风险）**
 
@@ -586,9 +586,9 @@ notify_custom_001.xml    → 定制提示
 
 1. **不要运行 `HiSuite.exe` 时加 `-f` / `-L` 参数去“试探”**。optstring 是 `L::f:`，语义未知（`option f value %s`）；乱传参可能直接进入某个自动化流程。日志串 `HiSuite30: Wrong Command line arg!!!` 说明它对错误参数只是报警告，不会安全退出。
 2. **不要在刷写进度出现后中断 HiSuite / 拔 USB / 关电脑**。此时 `hwtools\fastboot.exe` 正在向分区写镜像，中断即变砖高风险。
-3. **不要手动删除或编辑 `toDeleteROM.dat`**。它是 HiSuite 的删除队列；往里塞内容等于让它“按你给的路径去删文件”，是明确的破坏面。
+3. **不要手动删除或编辑 `toDeleteROM.dat`**。它是 HiSuite 的删除队列；往里塞内容等于让它“按清单里的路径去删文件”，是明确的破坏面。
 4. **不要修改 `Documents\HiSuite\ROM` 里已下载的文件**。存在 `sha256 not match.` 校验分支，改动会让包作废（是否触发删除未知）。
-5. **不要试图用“装 CA 证书”来抓包**。`httpcomponent.dll` 内嵌了自己的 CA 包（30+ 段 `-----BEGIN CERTIFICATE-----`），**不读系统证书库**，装证书既无效也违反本次约束。
+5. **不要试图用“装 CA 证书”来抓包**。`httpcomponent.dll` 内嵌了自己的 CA 包（30+ 段 `-----BEGIN CERTIFICATE-----`），**不读系统证书库**，装证书对抓包无效。
 6. **不要执行 adb / fastboot / hdc 任何命令**，包括只读的 `fastboot devices`——设备当前处于救援态，tool 与设备握手本身就可能改变状态机。
 7. **不要删 `userdata\UpdateDogDev\` 目录**。除删除队列外，`HiSuiteConfig.xml`/`UpdateInfo.dat`/`UserInfo.ini` 也在这里，`[UpdateStrategy] Strategy=never` 说明它被刻意配成不自动升级，删了可能触发意外行为。
 
@@ -620,7 +620,7 @@ notify_custom_001.xml    → 定制提示
 | `Download part zip file fail.` | 0x7631CC | W | 分片下载失败 |
 | `Download all zip file suc.` | 0x763508 | W | 全部分片成功 |
 | `start downcloudrom taskId: %d` | 0x763394 | W | ROM 下载任务启动 |
-| `Download url:` | 0x751B98 | W | **URL 日志格式串（本次路径未触发）** |
+| `Download url:` | 0x751B98 | W | **URL 日志格式串（该样本未触发）** |
 | `Check MD5 suc.` / `Check MD5 fail.` | 0x751B0C / 0x751D34 | W | MD5 校验结果 |
 | `sha256 match.` / `sha256 not match.` | 0x7643A8 / 0x7642D0 | W | SHA256 校验结果 |
 | `get file's sha256 fail.` | 0x76434C | W | 校验计算失败 |
@@ -745,7 +745,7 @@ taskid=4  taskType=202  LiveUpdateHisuite\full\changelog.xml
 
 ---
 
-## 附：本次使用的自建工具（可重复运行）
+## 附：本样本使用的自建工具（可重复运行）
 
 均位于 `%USERPROFILE%\Downloads\22\20261104\diag\tools\`，纯只读、静态：
 

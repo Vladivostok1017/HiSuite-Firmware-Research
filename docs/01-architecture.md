@@ -139,6 +139,6 @@ UpdateDate=2022-07-15
 └── Adb*.zip                         日志轮转归档
 ```
 
-`SystemUpdate_*.log` 是最有价值的一份：它会把三个 packageType 的完整 `FirmWare_Base` / `FirmWare_Cust` / `FirmWare_Preload` 三段版本号逐行打出来，即使你抓不到网络包也能据此确认目标固件版本。
+`SystemUpdate_*.log` 是最有价值的一份：它会把三个 packageType 的完整 `FirmWare_Base` / `FirmWare_Cust` / `FirmWare_Preload` 三段版本号逐行打出来，即使抓不到网络包，也能据此确认目标固件版本。
 
 日志级别字段 `Current Log Level: S3_DEFAULT_KEY`，调到更详细也不会打印 URL（`Download url:` 这个格式串存在，但 cloud_rom 分片通道不触发它）。

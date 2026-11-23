@@ -230,13 +230,13 @@ Last-Modified: Tue, 21 May 2024 08:16:06 GMT
 </root>
 
 ################################################################################
-# 附：本次未出现在抓包中、但存在于二进制里的接口
+# 附：该样本中未出现、但存在于二进制里的接口
 #
 #   POST /sp_ard_common/v2/CheckAndAuthorize.action?latest=true&verType=true
 #        Host: query.hicloud.com    ← 设备固件查询（请求体加密）
 #   POST /BL/v1/CheckAndAuthorize
 #        Host: query.hicloud.com    ← bootloader 授权（仅 rescue 通道）
 #
-# 这两个接口的响应里可能也带固件标识，但本次实验中固件清单是从
+# 这两个接口的响应里可能也带固件标识，但该样本中固件清单是从
 # update.dbankcdn.com 的 filelist.xml 直接拿到的，不需要解密它们。
 ################################################################################
